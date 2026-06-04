@@ -2,13 +2,14 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>ASCII风格 · 期货计算器 | 止盈止损工具</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -18,12 +19,12 @@
             justify-content: center;
             align-items: center;
             font-family: 'Fira Code', 'Courier New', 'SF Mono', 'Menlo', monospace;
-            padding: 1.5rem;
+            padding: 1rem;
         }
 
         /* 主容器——复古终端风格 */
         .ascii-container {
-            max-width: 760px;
+            max-width: 780px;
             width: 100%;
             background: #0b0e14;
             border: 2px solid #2ecc71;
@@ -36,21 +37,22 @@
         /* 顶部状态栏 — 类似老式终端 */
         .crt-header {
             background: #0f121c;
-            padding: 0.9rem 1.2rem;
+            padding: 0.75rem 1rem;
             border-bottom: 1px solid #2ecc71;
             display: flex;
             align-items: baseline;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 10px;
         }
 
         .logo {
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: bold;
             letter-spacing: 1px;
             color: #2ecc71;
             text-shadow: 0 0 3px #1e8f4e;
+            word-break: keep-all;
         }
 
         .logo::before {
@@ -59,63 +61,74 @@
         }
 
         .badge {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             background: #1a212f;
-            padding: 4px 10px;
+            padding: 3px 9px;
             border-radius: 20px;
             color: #9bb5d4;
             font-family: monospace;
             border-left: 2px solid #2ecc71;
+            white-space: nowrap;
         }
 
-        /* ascii 经典线条装饰 */
+        /* ascii 经典线条装饰 — 移动端支持滚动/折行优化 */
         .ascii-divider {
             color: #2ecc71;
-            font-size: 0.7rem;
-            letter-spacing: 2px;
+            font-size: 0.65rem;
+            letter-spacing: 1px;
             background: #070b10;
-            padding: 6px 1.2rem;
+            padding: 6px 1rem;
             font-family: monospace;
             border-bottom: 1px dashed #2e5a3e;
-            word-break: keep-all;
-            white-space: nowrap;
             overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .ascii-divider br {
+            display: none;  /* 移除换行，保证单行滚动更优雅 */
+        }
+
+        .ascii-divider-content {
+            display: inline-block;
+            font-family: monospace;
         }
 
         /* 主要内容区域 */
         .main-panel {
-            padding: 1.8rem 1.8rem 2rem;
+            padding: 1.3rem 1.2rem 1.8rem;
         }
 
-        /* 输入组 — 纯字符风格 */
+        /* 输入组 — 纯字符风格，移动端触摸友好 */
         .input-group {
             background: #0101016b;
             border: 1px solid #2e5a42;
-            padding: 1.3rem 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
+            padding: 1rem 1.2rem;
+            border-radius: 14px;
+            margin-bottom: 1.6rem;
             box-shadow: inset 0 0 6px #00000033, 0 2px 4px rgba(0,0,0,0.3);
         }
 
         .prompt-line {
             display: flex;
-            align-items: baseline;
+            align-items: center;
             flex-wrap: wrap;
-            gap: 12px;
-            font-size: 1.2rem;
+            gap: 10px;
+            font-size: 1.1rem;
         }
 
         .prompt-sign {
             color: #2ecc71;
             font-weight: bold;
-            font-size: 1.4rem;
+            font-size: 1.25rem;
+            white-space: nowrap;
         }
 
         .input-price {
             background: #000000aa;
             border: 1px solid #3f7862;
             padding: 10px 14px;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             width: 200px;
             font-family: 'Fira Code', monospace;
             font-weight: 500;
@@ -123,6 +136,8 @@
             border-radius: 12px;
             outline: none;
             transition: 0.15s;
+            flex: 1;
+            min-width: 140px;
         }
 
         .input-price:focus {
@@ -133,13 +148,14 @@
 
         .price-unit {
             color: #6c8f7c;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             background: #10161e;
             padding: 0 8px;
             border-radius: 20px;
+            white-space: nowrap;
         }
 
-        /* ascii 表格风格 */
+        /* ascii 表格风格 - 移动端触摸区域稍大 */
         .data-grid {
             background: #04070c;
             border: 1px solid #2b4a3a;
@@ -171,7 +187,7 @@
             letter-spacing: 0.5px;
             border-right: 1px solid #2c5a44;
             flex: 0.9;
-            min-width: 130px;
+            min-width: 110px;
         }
 
         .cell-value {
@@ -180,6 +196,7 @@
             font-weight: 500;
             font-size: 1.2rem;
             letter-spacing: 0.5px;
+            word-break: break-word;
         }
 
         .stop-loss .cell-value {
@@ -196,20 +213,20 @@
             font-weight: bold;
         }
 
-        /* 脚注 ascii 风格 */
+        /* 脚注 ascii 风格 — 移动端自适应换行 */
         .footer-note {
-            margin-top: 1.8rem;
+            margin-top: 1.5rem;
             background: #0b111c;
-            padding: 12px 1rem;
+            padding: 10px 0.8rem;
             border-radius: 40px;
             text-align: center;
-            font-size: 0.7rem;
+            font-size: 0.68rem;
             color: #5e7b6e;
             font-family: monospace;
             border-top: 1px solid #1b392b;
             display: flex;
             justify-content: center;
-            gap: 18px;
+            gap: 12px;
             flex-wrap: wrap;
         }
 
@@ -228,24 +245,121 @@
             color: #9ef0c2;
         }
 
-        /* 响应式微调 */
-        @media (max-width: 550px) {
+        /* ========= 移动端针对性优化 ========= */
+        @media (max-width: 640px) {
+            body {
+                padding: 0.75rem;
+            }
             .main-panel {
-                padding: 1.2rem;
+                padding: 1rem 0.9rem 1.5rem;
             }
             .grid-cell {
-                font-size: 0.85rem;
-                padding: 12px 8px;
+                padding: 12px 10px;
+                font-size: 0.9rem;
             }
             .cell-value {
+                font-size: 1.05rem;
+            }
+            .cell-label {
+                min-width: 95px;
+                font-size: 0.85rem;
+            }
+            .prompt-line {
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .prompt-sign {
+                font-size: 1.1rem;
+            }
+            .input-price {
                 font-size: 1rem;
+                padding: 9px 12px;
+                width: auto;
+                min-width: 130px;
+            }
+            .price-unit {
+                font-size: 0.75rem;
+            }
+            .input-group {
+                padding: 0.9rem 1rem;
+            }
+            .footer-note {
+                gap: 8px;
+                font-size: 0.65rem;
+            }
+            .badge {
+                font-size: 0.6rem;
+            }
+            .logo {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .grid-row {
+                flex-wrap: wrap;
+            }
+            /* 极端小屏下让标签和值分行，保留表格感但易读 */
+            .grid-cell {
+                flex: auto;
+                width: 100%;
+                text-align: left;
+            }
+            .cell-label {
+                border-right: none;
+                border-bottom: 1px solid #1e3a2e;
+                background: #111a24;
+                padding: 8px 12px;
+            }
+            .cell-value {
+                padding: 8px 12px;
+                font-size: 1.1rem;
+            }
+            .data-grid {
+                border-radius: 14px;
+            }
+            .grid-row {
+                flex-direction: column;
+                border-bottom: 1px solid #2a4a38;
+            }
+            .grid-row:last-child {
+                border-bottom: none;
             }
             .prompt-line {
                 flex-direction: column;
-                align-items: flex-start;
+                align-items: stretch;
             }
             .input-price {
                 width: 100%;
+            }
+            .prompt-sign {
+                margin-bottom: 2px;
+            }
+            .price-unit {
+                display: inline-block;
+                text-align: center;
+                width: fit-content;
+                margin-top: 4px;
+            }
+            .ascii-divider {
+                font-size: 0.6rem;
+                padding: 6px 12px;
+            }
+            .footer-note {
+                flex-direction: column;
+                align-items: center;
+                gap: 6px;
+            }
+        }
+
+        /* 保持可缩放体验，但输入框大小合适 */
+        @media (any-pointer: coarse) {
+            .input-price {
+                font-size: 16px; /* 防止iOS缩放 */
+            }
+            .grid-cell {
+                cursor: default;
             }
         }
     </style>
@@ -257,16 +371,14 @@
         <div class="badge">[ 止盈·止损 | AScii/TERM ]</div>
     </div>
     <div class="ascii-divider">
-        ┌────────────────────────────────────────────────────────────┐<br>
-        │  $ CALC — 基于入场价自动生成 +3%/+4%/+5%  &nbsp; 止损 -0.5% │
-        └────────────────────────────────────────────────────────────┘
+        <span class="ascii-divider-content">┌────────────────────────────────────────────────────────────┐  │  $ CALC — 基于入场价自动生成 +3%/+4%/+5%  &nbsp; 止损 -0.5% │  └────────────────────────────────────────────────────────────┘</span>
     </div>
     <div class="main-panel">
         <!-- 输入区域 ascii友好 -->
         <div class="input-group">
             <div class="prompt-line">
                 <span class="prompt-sign">$&gt; ENTRY_PRICE :</span>
-                <input type="number" id="basePriceInput" class="input-price" value="19.50" step="any" placeholder="例如 32.5">
+                <input type="number" id="basePriceInput" class="input-price" value="19.50" step="any" placeholder="例如 32.5" inputmode="decimal">
                 <span class="price-unit">[ 单位 / 元 ]</span>
             </div>
             <div style="font-size: 0.7rem; color: #4c7a66; margin-top: 10px; font-family: monospace;">
@@ -330,7 +442,7 @@
 
         // 保留两位小数，常规四舍五入 (金融风格)
         function formatMoney(value) {
-            // 处理极小精度浮点误差
+            // 处理极小精度浮点误差，保持两位小数
             return value.toFixed(2);
         }
 
@@ -338,7 +450,7 @@
         function updateAllTargets() {
             let rawPrice = priceInput.value.trim();
             if (rawPrice === "") {
-                // 若无输入, 清空占位提示
+                // 若无输入, 清空占位提示 (保持样式干净)
                 target3Span.textContent = "——";
                 target4Span.textContent = "——";
                 target5Span.textContent = "——";
@@ -347,7 +459,7 @@
             }
             let entry = parseFloat(rawPrice);
             if (isNaN(entry) || entry <= 0) {
-                // 非法输入展示错误风格
+                // 非法输入展示错误风格，但仍然保留原生语义
                 target3Span.textContent = "ERR";
                 target4Span.textContent = "ERR";
                 target5Span.textContent = "ERR";
@@ -376,13 +488,18 @@
         // 初始化立即计算默认值 (默认 19.50)
         updateAllTargets();
 
-        // 额外挂载一个小特性 —— 更符合终端感觉: 按回车不会导致其他问题，保持焦点方便
+        // 终端感觉: 按回车不会导致其他问题，保持焦点方便，并且主动触发更新
         priceInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 updateAllTargets();
-                this.blur();  // 可选失焦，让界面更干净
+                this.blur();  // 可选失焦，让界面更干净，移动端键盘收起更友好
             }
+        });
+
+        // 针对移动端虚拟键盘收回时再次确保数值正确 (额外保险)
+        priceInput.addEventListener('blur', function() {
+            updateAllTargets();
         });
     })();
 </script>
