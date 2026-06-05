@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>ASCII风格 · 期货计算器 | 止盈止损工具</title>
+    <title>ASCII风格 · 期货计算器 | 止盈止损工具 (精度3位)</title>
     <style>
         * {
             margin: 0;
@@ -20,9 +20,11 @@
             align-items: center;
             font-family: 'Fira Code', 'Courier New', 'SF Mono', 'Menlo', monospace;
             padding: 1rem;
+            /* 确保body本身不产生滚动条 - 内容溢出由内部处理 */
+            overflow: hidden;
         }
 
-        /* 主容器——复古终端风格 */
+        /* 主容器——复古终端风格，完全居中且不溢出视口 */
         .ascii-container {
             max-width: 780px;
             width: 100%;
@@ -30,8 +32,24 @@
             border: 2px solid #2ecc71;
             box-shadow: 0 0 0 1px #1f3b2c, 0 10px 25px -8px black;
             border-radius: 14px;
-            overflow: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
             transition: all 0.2s;
+            /* 保证容器高度自适应，不超出视口 */
+            max-height: 98vh;
+        }
+
+        /* 自定义滚动条 - 极简风格，不影响布局美感，仅在需要时出现 */
+        .ascii-container::-webkit-scrollbar {
+            width: 4px;
+            background: #0f121c;
+        }
+        .ascii-container::-webkit-scrollbar-thumb {
+            background: #2ecc71;
+            border-radius: 10px;
+        }
+        .ascii-container::-webkit-scrollbar-track {
+            background: #07100c;
         }
 
         /* 顶部状态栏 — 类似老式终端 */
@@ -71,7 +89,7 @@
             white-space: nowrap;
         }
 
-        /* ascii 经典线条装饰 — 移动端支持滚动/折行优化 */
+        /* ascii 经典线条装饰 — 移动端支持横向滚动但无垂直溢出，优化不出现外层滚动条 */
         .ascii-divider {
             color: #2ecc71;
             font-size: 0.65rem;
@@ -83,10 +101,11 @@
             overflow-x: auto;
             white-space: nowrap;
             -webkit-overflow-scrolling: touch;
+            /* 内部横向滚动不会影响外部滚动条，容器处理 */
         }
 
         .ascii-divider br {
-            display: none;  /* 移除换行，保证单行滚动更优雅 */
+            display: none;
         }
 
         .ascii-divider-content {
@@ -94,9 +113,9 @@
             font-family: monospace;
         }
 
-        /* 主要内容区域 */
+        /* 主要内容区域 - 内边距优化确保内部不溢出 */
         .main-panel {
-            padding: 1.3rem 1.2rem 1.8rem;
+            padding: 1.3rem 1.2rem 1.5rem;
         }
 
         /* 输入组 — 纯字符风格，移动端触摸友好 */
@@ -105,7 +124,7 @@
             border: 1px solid #2e5a42;
             padding: 1rem 1.2rem;
             border-radius: 14px;
-            margin-bottom: 1.6rem;
+            margin-bottom: 1.4rem;
             box-shadow: inset 0 0 6px #00000033, 0 2px 4px rgba(0,0,0,0.3);
         }
 
@@ -213,9 +232,9 @@
             font-weight: bold;
         }
 
-        /* 脚注 ascii 风格 — 移动端自适应换行 */
+        /* 脚注 ascii 风格 — 自适应换行 */
         .footer-note {
-            margin-top: 1.5rem;
+            margin-top: 1.3rem;
             background: #0b111c;
             padding: 10px 0.8rem;
             border-radius: 40px;
@@ -245,13 +264,17 @@
             color: #9ef0c2;
         }
 
-        /* ========= 移动端针对性优化 ========= */
+        /* ========= 移动端 & 响应式 - 保证无水平溢出，始终居中无滚动条(除容器内部必要纵向滚动) ========= */
         @media (max-width: 640px) {
             body {
-                padding: 0.75rem;
+                padding: 0.5rem;
+                overflow: hidden;
+            }
+            .ascii-container {
+                max-height: 97vh;
             }
             .main-panel {
-                padding: 1rem 0.9rem 1.5rem;
+                padding: 1rem 0.9rem 1.2rem;
             }
             .grid-cell {
                 padding: 12px 10px;
@@ -353,14 +376,24 @@
             }
         }
 
-        /* 保持可缩放体验，但输入框大小合适 */
+        /* 保持可缩放体验，但输入框大小合适，不允许全局滚动条出现 */
         @media (any-pointer: coarse) {
             .input-price {
-                font-size: 16px; /* 防止iOS缩放 */
+                font-size: 16px;
             }
             .grid-cell {
                 cursor: default;
             }
+        }
+
+        /* 针对横向溢出或者小屏下ascii-divider滚动条只影响内部区域, 无整体滚动条 */
+        .ascii-divider::-webkit-scrollbar {
+            height: 3px;
+            background: #0a121c;
+        }
+        .ascii-divider::-webkit-scrollbar-thumb {
+            background: #2ecc71;
+            border-radius: 10px;
         }
     </style>
 </head>
@@ -368,10 +401,10 @@
 <div class="ascii-container">
     <div class="crt-header">
         <div class="logo">TARGET_ENGINE v1.0</div>
-        <div class="badge">[ 止盈·止损 | AScii/TERM ]</div>
+        <div class="badge">[ 止盈·止损 | ASCII/TERM | 精度0.001 ]</div>
     </div>
     <div class="ascii-divider">
-        <span class="ascii-divider-content">┌────────────────────────────────────────────────────────────┐  │  $ CALC — 基于入场价自动生成 +3%/+4%/+5%  &nbsp; 止损 -0.5% │  └────────────────────────────────────────────────────────────┘</span>
+        <span class="ascii-divider-content">┌────────────────────────────────────────────────────────────┐  │  $ CALC — 基于入场价自动生成 +3%/+4%/+5%  &nbsp; 止损 -0.5% │  │  精确到三位小数 │  └────────────────────────────────────────────────────────────┘</span>
     </div>
     <div class="main-panel">
         <!-- 输入区域 ascii友好 -->
@@ -382,7 +415,7 @@
                 <span class="price-unit">[ 单位 / 元 ]</span>
             </div>
             <div style="font-size: 0.7rem; color: #4c7a66; margin-top: 10px; font-family: monospace;">
-                ⚡ 实时计算 | 上涨目标 & 止损保护
+                ⚡ 实时计算 | 上涨目标 & 止损保护 | 保留3位小数
             </div>
         </div>
 
@@ -424,9 +457,9 @@
 
         <!-- 额外ascii辅助说明 -->
         <div class="footer-note">
-            <span>└─ $ 公式: 入场 × (1 + 涨幅%) ─┘</span>
-            <span>│ 止损 = 入场 × (1 - 0.5%) │</span>
-            <span>▓ 自动更新 ▓</span>
+            <span>└─ $ 公式: 入场 × (1 + 涨幅%) 保留3位 ─┘</span>
+            <span>│ 止损 = 入场 × (1 - 0.5%) 三位小数 │</span>
+            <span>▓ 自动更新 | 精确到0.001 ▓</span>
         </div>
     </div>
 </div>
@@ -440,67 +473,108 @@
         const target5Span = document.getElementById('target5');
         const stopLossSpan = document.getElementById('stopLossVal');
 
-        // 保留两位小数，常规四舍五入 (金融风格)
-        function formatMoney(value) {
-            // 处理极小精度浮点误差，保持两位小数
-            return value.toFixed(2);
+        /**
+         * 将数值格式化为三位小数字符串
+         * 精确到小数点后3位，四舍五入处理金融风格
+         */
+        function formatThreeDecimals(value) {
+            if (typeof value !== 'number' || isNaN(value) || !isFinite(value)) {
+                return "ERR";
+            }
+            // 保留三位小数，始终显示三位（例如 19.500）
+            return value.toFixed(3);
         }
 
-        // 核心计算函数
+        // 核心计算函数：实时计算止盈/止损价格
         function updateAllTargets() {
             let rawPrice = priceInput.value.trim();
             if (rawPrice === "") {
-                // 若无输入, 清空占位提示 (保持样式干净)
-                target3Span.textContent = "——";
-                target4Span.textContent = "——";
-                target5Span.textContent = "——";
-                stopLossSpan.textContent = "——";
+                target3Span.textContent = "———";
+                target4Span.textContent = "———";
+                target5Span.textContent = "———";
+                stopLossSpan.textContent = "———";
                 return;
             }
             let entry = parseFloat(rawPrice);
+            // 有效性检测：必须为正数数字（价格>0）
             if (isNaN(entry) || entry <= 0) {
-                // 非法输入展示错误风格，但仍然保留原生语义
-                target3Span.textContent = "ERR";
-                target4Span.textContent = "ERR";
-                target5Span.textContent = "ERR";
-                stopLossSpan.textContent = "ERR";
+                target3Span.textContent = "INVLD";
+                target4Span.textContent = "INVLD";
+                target5Span.textContent = "INVLD";
+                stopLossSpan.textContent = "INVLD";
                 return;
             }
 
-            // 上涨 3% 4% 5%
+            // 计算上涨 3%、4%、5% 的目标价格
             const profit3 = entry * (1 + 3 / 100);
             const profit4 = entry * (1 + 4 / 100);
             const profit5 = entry * (1 + 5 / 100);
-            // 止损 下跌0.5%
-            const stopLoss = entry * (1 - 0.5 / 100);   // 0.5% 下跌
+            // 止损价格: 下跌0.5%
+            const stopLoss = entry * (1 - 0.5 / 100);   // 即入场价 * 0.995
 
-            // 更新显示 (保留两位小数)
-            target3Span.textContent = formatMoney(profit3);
-            target4Span.textContent = formatMoney(profit4);
-            target5Span.textContent = formatMoney(profit5);
-            stopLossSpan.textContent = formatMoney(stopLoss);
+            // 更新显示精确到三位小数
+            target3Span.textContent = formatThreeDecimals(profit3);
+            target4Span.textContent = formatThreeDecimals(profit4);
+            target5Span.textContent = formatThreeDecimals(profit5);
+            stopLossSpan.textContent = formatThreeDecimals(stopLoss);
         }
 
-        // 监听输入事件 + 初始化
+        // 监听各种输入交互确保实时计算
         priceInput.addEventListener('input', updateAllTargets);
-        // 监听 change 事件确保手动回车或失去焦点时也一样
         priceInput.addEventListener('change', updateAllTargets);
-        // 初始化立即计算默认值 (默认 19.50)
-        updateAllTargets();
-
-        // 终端感觉: 按回车不会导致其他问题，保持焦点方便，并且主动触发更新
+        
+        // 支持键盘回车事件，同时优化移动端：回车后收起键盘且更新数值
         priceInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 updateAllTargets();
-                this.blur();  // 可选失焦，让界面更干净，移动端键盘收起更友好
+                this.blur();   // 失焦后收起虚拟键盘，提升移动端体验
             }
         });
 
-        // 针对移动端虚拟键盘收回时再次确保数值正确 (额外保险)
+        // 失焦时再次保证数值显示正确
         priceInput.addEventListener('blur', function() {
             updateAllTargets();
         });
+
+        // 初始化立即计算默认值 (默认 19.50 展示三位小数结果)
+        updateAllTargets();
+
+        // 确保在页面完全加载（包括字体等）后再次保证居中和无滚动条错位
+        window.addEventListener('DOMContentLoaded', function() {
+            updateAllTargets();
+            // 额外的微调：防止body任何溢出滚动条，确保容器高度不超过视口高度
+            const container = document.querySelector('.ascii-container');
+            if (container && window.innerHeight > 0) {
+                const maxH = window.innerHeight * 0.96;
+                if (container.scrollHeight > maxH) {
+                    container.style.maxHeight = maxH + 'px';
+                } else {
+                    container.style.maxHeight = '98vh';
+                }
+            }
+        });
+
+        // 监听窗口resize时动态调整容器最大高度，避免出现滚动条冗余
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            if (resizeTimer) clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() {
+                const container = document.querySelector('.ascii-container');
+                if (container) {
+                    const maxHeight = window.innerHeight * 0.96;
+                    if (container.scrollHeight > maxHeight) {
+                        container.style.maxHeight = maxHeight + 'px';
+                    } else {
+                        container.style.maxHeight = '98vh';
+                    }
+                }
+                // 确保body无溢出滚动
+                document.body.style.overflow = 'hidden';
+            }, 60);
+        });
+        // 确保body本身永远不会出现滚动条
+        document.body.style.overflow = 'hidden';
     })();
 </script>
 </body>
